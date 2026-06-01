@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verde Menta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,600&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --menta:       #b5e5c8;
+      --menta-deep:  #7ecba1;
+      --menta-light: #dff5e9;
+      --menta-pale:  #f0fbf4;
+      --text:        #2c4a37;
+      --accent:      #4a9e6f;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--menta-pale) 0%, var(--menta-light) 50%, #c8ecd9 100%);
+      background-attachment: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      font-family: 'Lora', serif;
+      /* overflow: hidden ELIMINADO — permite scroll */
+      position: relative;
+    }
+
+    /* ── Canvas de partículas ── */
+    #canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    /* ── Tarjeta central ── */
+    .card {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(126,203,161,0.45);
+      border-radius: 2.5rem;
+      padding: 4.5rem 5rem;
+      max-width: 640px;
+      width: 90%;
+      box-shadow:
+        0 8px 48px rgba(74,158,111,0.12),
+        0 2px 12px rgba(74,158,111,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      animation: floatCard 6s ease-in-out infinite;
+    }
+
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    /* ── Ornamento superior ── */
+    .ornament {
+      text-align: center;
+      font-size: 1.4rem;
+      letter-spacing: 0.8rem;
+      color: var(--menta-deep);
+      margin-bottom: 2.2rem;
+      opacity: 0.75;
+    }
+
+    /* ── Título ── */
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-style: italic;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 1.8rem;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+
+    /* Línea divisoria ornamental */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--menta-deep));
+    }
+    .divider::after {
+      background: linear-gradient(to left, transparent, var(--menta-deep));
+    }
+    .divider span {
+      color: var(--accent);
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+
+    /* ── Cuerpo de texto ── */
+    p {
+      font-family: 'Lora', serif;
+      font-size: 1.05rem;
+      line-height: 1.95;
+      color: var(--text);
+      text-align: left;
+      opacity: 0.88;
+    }
+
+    p + p { margin-top: 1.1rem; }
+
+    /* ── Ornamento inferior ── */
+    .ornament-bottom {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--menta-deep);
+      margin-top: 2.4rem;
+      letter-spacing: 0.5rem;
+      opacity: 0.65;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+
+  <article class="card">
+    <div class="ornament">✦ ✦ ✦</div>
+
+    <h1>Lluvia de amor</h1>
+
+    <div class="divider"><span>❧</span></div>
+
+    <p>
+      Las nubes de lluvia, tan inmensas y hermosas, dejan caer la vida en toda la tierra, en especial sobre los arboles
+    </p>
+    <p>
+      Asi como cada arbol deja hacer llover sus hojas, yo no dejare de llenarte de una lluvia de amor. 
+    </p>
+    <p>
+      Te amo, mi amor jamas dejara  de llover.
+    </p>
+
+    <div class="ornament-bottom">— ♥ —</div>
+  </article>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx    = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    /* ── Símbolos que caen ── */
+    const HEARTS  = ['♥', '♡'];
+    const LEAVES  = ['🌿', '❧', '🍃', '✿'];
+    const LEAF_COLORS = [
+      'rgba(126,203,161,0.65)',
+      'rgba(74,158,111,0.55)',
+      'rgba(100,180,130,0.60)',
+      'rgba(60,150,100,0.50)',
+    ];
+    const HEART_COLORS = [
+      'rgba(210,50,60,0.80)',
+      'rgba(190,30,50,0.75)',
+      'rgba(230,70,80,0.70)',
+      'rgba(200,40,55,0.85)',
+    ];
+
+    const particles = Array.from({ length: 38 }, () => spawn(true));
+
+    function spawn(init) {
+      const size    = 14 + Math.random() * 22;
+      const isHeart = Math.random() < 0.4;
+      const symbol  = isHeart
+        ? HEARTS[Math.floor(Math.random() * HEARTS.length)]
+        : LEAVES[Math.floor(Math.random() * LEAVES.length)];
+      const colors  = isHeart ? HEART_COLORS : LEAF_COLORS;
+      return {
+        x:      Math.random() * (canvas.width  || window.innerWidth),
+        y:      init ? Math.random() * -(canvas.height || window.innerHeight)
+                     : -(size + 10),
+        vy:     0.45 + Math.random() * 0.9,
+        vx:     (Math.random() - 0.5) * 0.5,
+        rot:    Math.random() * Math.PI * 2,
+        vrot:   (Math.random() - 0.5) * 0.025,
+        size,
+        symbol,
+        color:  colors[Math.floor(Math.random() * colors.length)],
+        alpha:  0.70 + Math.random() * 0.3,
+        sway:   Math.random() * Math.PI * 2,
+        swaySpeed: 0.008 + Math.random() * 0.012,
+      };
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const p of particles) {
+        p.sway += p.swaySpeed;
+        p.x   += p.vx + Math.sin(p.sway) * 0.6;
+        p.y   += p.vy;
+        p.rot += p.vrot;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = p.alpha;
+        ctx.font        = `${p.size}px serif`;
+        ctx.fillStyle   = p.color;
+        ctx.fillText(p.symbol, -p.size * 0.35, p.size * 0.35);
+        ctx.restore();
+
+        if (p.y > canvas.height + 40) Object.assign(p, spawn(false));
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
